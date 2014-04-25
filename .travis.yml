@@ -16,15 +16,15 @@ install:
   - pip install numpy Sphinx coveralls coverage nose pygments
 
   - git clone https://github.com/clang-omp/llvm ${HOME}/llvm
-  - git clone https://github.com/clang-omp/compiler-rt  ${HOME}/llvm/projects/compiler-rt
+  - git clone https://github.com/clang-omp/compiler-rt ${HOME}/llvm/projects/compiler-rt
   - git clone -b clang-omp https://github.com/clang-omp/clang ${HOME}/llvm/tools/clang
-  - mkdir build
-  - mkdir llvm-omp
-  - cd build
-  - ../llvm/configure --enable-optimized --prefix=${HOME}/llvm-omp
+  - mkdir ${HOME}/build
+  - mkdir ${HOME}/llvm-omp
+  - cd ${HOME}/build
+  - ${HOME}/llvm/configure --enable-optimized --prefix=${HOME}/llvm-omp
   - REQUIRES_RTTI=1 make
   - make install
-  - export PATH=/install/prefix/bin:$PATH
+  - export PATH=${HOME}/llvm-omp/bin:$PATH
   - export C_INCLUDE_PATH=${HOME}/llvm-omp/include:$C_INCLUDE_PATH
   - export CPLUS_INCLUDE_PATH=${HOME}/llvm-omp:$CPLUS_INCLUDE_PATH
   - export LIBRARY_PATH=${HOME}/llvm-omp:$LIBRARY_PATH
