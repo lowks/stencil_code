@@ -18,9 +18,9 @@ install:
   - git clone https://github.com/clang-omp/llvm ${HOME}/llvm
   - git clone https://github.com/clang-omp/compiler-rt ${HOME}/llvm/projects/compiler-rt
   - git clone -b clang-omp https://github.com/clang-omp/clang ${HOME}/llvm/tools/clang
-  - mkdir ${HOME}/build
+  - mkdir ${HOME}/llvm-omp-build
   - mkdir ${HOME}/llvm-omp
-  - cd ${HOME}/build
+  - cd ${HOME}/llvm-omp-build
   - ${HOME}/llvm/configure --enable-optimized --prefix=${HOME}/llvm-omp
   - REQUIRES_RTTI=1 make
   - make install
