@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>stencil_code.stencil_grid &mdash; stencil_code 0.1a1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="stencil_code 0.1a1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">stencil_code 0.1a1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for stencil_code.stencil_grid</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A two-dimension grid of numeric values, used for input and output to a stencil kernel.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span><span class="p">,</span> <span class="n">ifilterfalse</span>
+
+
+<div class="viewcode-block" id="StencilGrid"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid">[docs]</a><span class="k">class</span> <span class="nc">StencilGrid</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_variables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interior</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_grid_variables</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_interior</span><span class="p">()</span>
+        <span class="c"># add default neighbor definition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_definition</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_default_neighbor_definitions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corner_points</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edge_points</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_corner_points_iterator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_edge_points_iterator</span><span class="p">()</span>
+
+        <span class="c"># import types</span>
+        <span class="c">#</span>
+        <span class="c"># code = [&quot;def corner_points(self):&quot;]</span>
+        <span class="c"># for dimension_index in range(self.dim):</span>
+        <span class="c">#     for each_dimension in range(self.dim):</span>
+        <span class="c">#         if each_dimension == dimension_index:</span>
+        <span class="c">#             code.append(</span>
+        <span class="c">#                 &quot;%sfor d%s in [0,%d]:&quot; %</span>
+        <span class="c">#                 (&#39; &#39;*4*(each_dimension+1), each_dimension, self.shape[each_dimension])</span>
+        <span class="c">#             )</span>
+        <span class="c">#         else:</span>
+        <span class="c">#             code.append(</span>
+        <span class="c">#                 &quot;%sfor d%s in range(%d):&quot; %</span>
+        <span class="c">#                 (&#39; &#39;*4*(each_dimension+1), each_dimension, self.shape[each_dimension])</span>
+        <span class="c">#             )</span>
+        <span class="c">#     code.append(&quot;%syield (%s)&quot; % (&#39; &#39;*4*(self.dim+1), &quot;,&quot;.join(map(lambda x: &quot;d%d&quot; % x, range(self.dim)))))</span>
+        <span class="c"># for line in code:</span>
+        <span class="c">#     print(line)</span>
+        <span class="c"># exec(&#39;\n&#39;.join(code))</span>
+        <span class="c"># self.corner_points = types.MethodType(corner_points, self)</span>
+
+    <span class="c"># want this to be indexable</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+
+<div class="viewcode-block" id="StencilGrid.set_grid_variables"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.set_grid_variables">[docs]</a>    <span class="k">def</span> <span class="nf">set_grid_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;DIM&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)]</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.set_interior"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.set_interior">[docs]</a>    <span class="k">def</span> <span class="nf">set_interior</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the number of interior points in each dimension</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interior</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.set_neighborhood"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.set_neighborhood">[docs]</a>    <span class="k">def</span> <span class="nf">set_neighborhood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighborhood_id</span><span class="p">,</span> <span class="n">coordinate_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        a grid can one or more notions of a neighborhood of a given grid point</span>
+<span class="sd">        neighborhood_id is an integer identifier of the neighborhood</span>
+<span class="sd">        coordinate_list is a list of tuples appropriate to the shape of the grid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">coordinate</span> <span class="ow">in</span> <span class="n">coordinate_list</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="s">&quot;neighborhood coordinates must be of proper dimension&quot;</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neighbor_definition</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">neighborhood_id</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_definition</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_definition</span><span class="p">[</span><span class="n">neighborhood_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">coordinate_list</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.von_neuman_neighborhood"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.von_neuman_neighborhood">[docs]</a>    <span class="k">def</span> <span class="nf">von_neuman_neighborhood</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        create a neighborhood of all adjacent points along</span>
+<span class="sd">        coordinate axes, suitable for the dimension of this instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">neighborhood</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">dimension</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+                <span class="n">point</span> <span class="o">=</span> <span class="n">origin</span><span class="p">[:]</span>
+                <span class="n">point</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span> <span class="o">=</span> <span class="n">offset</span>
+                <span class="n">neighborhood</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">neighborhood</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.moore_neighborhood"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.moore_neighborhood">[docs]</a>    <span class="k">def</span> <span class="nf">moore_neighborhood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_origin</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        create a neighborhood of all adjacent points along</span>
+<span class="sd">        coordinate axes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">neighborhood_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">dimension_iterator</span><span class="p">(</span><span class="n">dimension</span><span class="p">,</span> <span class="n">point_accumulator</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            accumulates into local neighborhood_list</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">dimension</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">include_origin</span> <span class="ow">or</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">point_accumulator</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">neighborhood_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">point_accumulator</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">dimension_coordinate</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">new_point_accumulator</span> <span class="o">=</span> <span class="n">point_accumulator</span><span class="p">[:]</span>
+                    <span class="n">new_point_accumulator</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dimension_coordinate</span><span class="p">)</span>
+                    <span class="n">dimension_iterator</span><span class="p">(</span>
+                        <span class="n">dimension</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">new_point_accumulator</span>
+                    <span class="p">)</span>
+
+        <span class="n">dimension_iterator</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="k">return</span> <span class="n">neighborhood_list</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.set_default_neighbor_definitions"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.set_default_neighbor_definitions">[docs]</a>    <span class="k">def</span> <span class="nf">set_default_neighbor_definitions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the default for neighbors[0] and neighbors[1].  Note that neighbors[1]</span>
+<span class="sd">        does not include the center point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_definition</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">zero_point</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_definition</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">zero_point</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_definition</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">von_neuman_neighborhood</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.interior_points"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.interior_points">[docs]</a>    <span class="k">def</span> <span class="nf">interior_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterator over the interior points of the grid.  Only executed</span>
+<span class="sd">        in pure Python mode; in SEJITS mode, it should be executed only</span>
+<span class="sd">        in the translated language/library.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">itertools</span>
+        <span class="n">all_dims</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">all_dims</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.make_edge_points_iterator"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.make_edge_points_iterator">[docs]</a>    <span class="k">def</span> <span class="nf">make_edge_points_iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        creates an iterator for edge points of the stencil.  This is done by dynamically compiling code</span>
+<span class="sd">        because it is difficult to create an iterator for the nesting of for loops over and arbitrary</span>
+<span class="sd">        shape of the grid.  Edge points are defined to be for each dimension the scalar values of the</span>
+<span class="sd">        corner points in that dimension combined with the iteration of all scalars from the other dimensions</span>
+<span class="sd">        omitting their corner values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">types</span>
+
+        <span class="n">edge_points</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s">&quot;def edge_points(self):&quot;</span><span class="p">,</span>
+            <span class="s">&quot;    seen = set()&quot;</span><span class="p">,</span>
+            <span class="s">&quot;    rejected = 0&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">dimension_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">each_dimension</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">each_dimension</span> <span class="o">==</span> <span class="n">dimension_index</span><span class="p">:</span>
+                    <span class="n">border_points</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span><span class="p">)</span> <span class="o">+</span> \
+                        <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">each_dimension</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">each_dimension</span><span class="p">])</span>
+                    <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">for d</span><span class="si">%s</span><span class="s"> in [</span><span class="si">%s</span><span class="s">]:&quot;</span> <span class="o">%</span>
+                                <span class="p">(</span>
+                                    <span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="n">each_dimension</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">each_dimension</span><span class="p">,</span>
+                                    <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="p">,</span> <span class="n">border_points</span><span class="p">))</span>
+                                <span class="p">)</span>
+                                <span class="p">)</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">each_dimension</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="n">dimension_index</span><span class="p">:</span>
+                    <span class="n">border_points</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">each_dimension</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span><span class="p">)</span>
+                    <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">for d</span><span class="si">%s</span><span class="s"> in [</span><span class="si">%s</span><span class="s">]:&quot;</span> <span class="o">%</span>
+                                <span class="p">(</span>
+                                    <span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="n">each_dimension</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">each_dimension</span><span class="p">,</span>
+                                    <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="p">,</span> <span class="n">border_points</span><span class="p">))</span>
+                                <span class="p">)</span>
+                                <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">for d</span><span class="si">%s</span><span class="s"> in range(</span><span class="si">%s</span><span class="s">):&quot;</span> <span class="o">%</span>
+                                <span class="p">(</span>
+                                    <span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="n">each_dimension</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="n">each_dimension</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">each_dimension</span><span class="p">]</span>
+                                <span class="p">)</span>
+                                <span class="p">)</span>
+            <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">point = (</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="s">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s">&quot;d</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)))))</span>
+            <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">if not seen.__contains__(point):&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+            <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">seen.add(point)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="o">+</span><span class="mi">2</span><span class="p">)))</span>
+            <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">yield point&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="o">+</span><span class="mi">2</span><span class="p">)))</span>
+            <span class="c"># uncomment out below to see how many points rejected as already seen</span>
+            <span class="c"># code.append(&quot;%selse:&quot; % (&#39; &#39;*4*(self.dim+1)))</span>
+            <span class="c"># code.append(&quot;%srejected += 1&quot; % (&#39; &#39;*4*(self.dim+2)))</span>
+            <span class="c"># code.append(&#39;    print &quot;rejected %d points&quot; % rejected&#39; )</span>
+
+        <span class="c"># uncomment to see generated code</span>
+        <span class="c"># for line in code:</span>
+        <span class="c">#     print(line)</span>
+        <span class="k">exec</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">code</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edge_points</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">edge_points</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.make_corner_points_iterator"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.make_corner_points_iterator">[docs]</a>    <span class="k">def</span> <span class="nf">make_corner_points_iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        creates an iterator for border points of the stencil.  This is done by dynamically compiling code</span>
+<span class="sd">        because it is difficult to create an iterator for the nesting of for loops over and arbitrary</span>
+<span class="sd">        shape of the grid.  Border points are defined to be iteration over all points within ghost_depth</span>
+<span class="sd">        of the min and max values of each dimension</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">types</span>
+
+        <span class="n">corner_points</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;def corner_points(self):&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">each_dimension</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
+            <span class="n">border_points</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span><span class="p">)</span> <span class="o">+</span> \
+                <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">each_dimension</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">each_dimension</span><span class="p">])</span>
+            <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">for d</span><span class="si">%s</span><span class="s"> in [</span><span class="si">%s</span><span class="s">]:&quot;</span> <span class="o">%</span>
+                        <span class="p">(</span>
+                            <span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="n">each_dimension</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                            <span class="n">each_dimension</span><span class="p">,</span>
+                            <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="p">,</span> <span class="n">border_points</span><span class="p">))</span>
+                        <span class="p">)</span>
+                        <span class="p">)</span>
+        <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">yield (</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="s">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s">&quot;d</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">x</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">)))))</span>
+        <span class="c"># for line in code:</span>
+        <span class="c">#     print(line)</span>
+        <span class="k">exec</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">code</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corner_points</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">corner_points</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.border_points"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.border_points">[docs]</a>    <span class="k">def</span> <span class="nf">border_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterator over the border points of a grid.  Only executed in pure Python</span>
+<span class="sd">        mode; in SEJITS mode, it should be executed only in the translated</span>
+<span class="sd">        language/library.</span>
+
+<span class="sd">        Border points are the sequential iteration of all corner points</span>
+<span class="sd">        followed by all edge points</span>
+<span class="sd">        Note: boundary points is slightly faster but</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">corner_points</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">point</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_points</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">point</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.boundary_points"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.boundary_points">[docs]</a>    <span class="k">def</span> <span class="nf">boundary_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        different technique using itertools to compute boundary points of a grid</span>
+<span class="sd">        This method does not work if ghost_depth is != 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">ghost_depth</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;ghost depth not 1, use border points instead&quot;</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">rejected</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ranges</span> <span class="o">=</span> <span class="p">[</span><span class="nb">xrange</span><span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dims</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">bound</span> <span class="ow">in</span> <span class="n">dim</span><span class="p">:</span>
+                <span class="n">spec</span> <span class="o">=</span> <span class="n">ranges</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">[[</span><span class="n">bound</span><span class="p">]]</span> <span class="o">+</span> <span class="n">ranges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">ifilterfalse</span><span class="p">(</span><span class="n">seen</span><span class="o">.</span><span class="n">__contains__</span><span class="p">,</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">spec</span><span class="p">)):</span>
+                    <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="n">pt</span>
+                <span class="c"># commented out code equivalent to above but tracks dups</span>
+                <span class="c"># for pt in product(*spec):</span>
+                <span class="c">#     if not seen.__contains__(pt):</span>
+                <span class="c">#         seen.add(pt)</span>
+                <span class="c">#         yield pt</span>
+                <span class="c">#     else:</span>
+                <span class="c">#         rejected += 1</span>
+        <span class="c"># print &quot;boundary points rejected %d&quot; % rejected</span>
+</div>
+<div class="viewcode-block" id="StencilGrid.neighbors"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_grid.StencilGrid.neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">neighbors_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the list of neighbors with the given neighbors_id. By</span>
+<span class="sd">        default, IDs 0 and 1 give the list consisting of all</span>
+<span class="sd">        points at a distance of 0 and 1 from the center point,</span>
+<span class="sd">        respectively. Uses neighbor_definition to determine what the</span>
+<span class="sd">        neighbors are.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># import pprint</span>
+        <span class="c"># print( &quot;neighbors_id %s&quot; % neighbors_id )</span>
+        <span class="c"># pprint.pprint(self.neighbor_definition)</span>
+        <span class="c"># return tuples for each neighbor</span>
+        <span class="k">for</span> <span class="n">neighbor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_definition</span><span class="p">[</span><span class="n">neighbors_id</span><span class="p">]:</span>
+            <span class="k">yield</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">center</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">neighbor</span><span class="p">)))</span>
+</div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">stencil_code 0.1a1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Leonard Truong.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

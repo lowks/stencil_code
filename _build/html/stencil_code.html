@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>stencil_code package &mdash; stencil_code 0.1a1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="stencil_code 0.1a1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">stencil_code 0.1a1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="stencil-code-package">
+<h1>stencil_code package<a class="headerlink" href="#stencil-code-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="stencil_code.backend.html">stencil_code.backend package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stencil_code.backend.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stencil_code.backend.html#stencil-code-backend-c-module">stencil_code.backend.c module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stencil_code.backend.html#stencil-code-backend-ocl-module">stencil_code.backend.ocl module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stencil_code.backend.html#stencil-code-backend-omp-module">stencil_code.backend.omp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stencil_code.backend.html#stencil-code-backend-stencil-backend-module">stencil_code.backend.stencil_backend module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stencil_code.backend.html#module-stencil_code.backend">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-stencil_code.stencil_grid">
+<span id="stencil-code-stencil-grid-module"></span><h2>stencil_code.stencil_grid module<a class="headerlink" href="#module-stencil_code.stencil_grid" title="Permalink to this headline">¶</a></h2>
+<p>A two-dimension grid of numeric values, used for input and output to a stencil kernel.</p>
+<dl class="class">
+<dt id="stencil_code.stencil_grid.StencilGrid">
+<em class="property">class </em><tt class="descclassname">stencil_code.stencil_grid.</tt><tt class="descname">StencilGrid</tt><big>(</big><em>size</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.border_points">
+<tt class="descname">border_points</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.border_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.border_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator over the border points of a grid.  Only executed in pure Python
+mode; in SEJITS mode, it should be executed only in the translated
+language/library.</p>
+<p>Border points are the sequential iteration of all corner points
+followed by all edge points
+Note: boundary points is slightly faster but</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.boundary_points">
+<tt class="descname">boundary_points</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.boundary_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.boundary_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>different technique using itertools to compute boundary points of a grid
+This method does not work if ghost_depth is != 1</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.interior_points">
+<tt class="descname">interior_points</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.interior_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.interior_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator over the interior points of the grid.  Only executed
+in pure Python mode; in SEJITS mode, it should be executed only
+in the translated language/library.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.make_corner_points_iterator">
+<tt class="descname">make_corner_points_iterator</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.make_corner_points_iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.make_corner_points_iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates an iterator for border points of the stencil.  This is done by dynamically compiling code
+because it is difficult to create an iterator for the nesting of for loops over and arbitrary
+shape of the grid.  Border points are defined to be iteration over all points within ghost_depth
+of the min and max values of each dimension</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.make_edge_points_iterator">
+<tt class="descname">make_edge_points_iterator</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.make_edge_points_iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.make_edge_points_iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates an iterator for edge points of the stencil.  This is done by dynamically compiling code
+because it is difficult to create an iterator for the nesting of for loops over and arbitrary
+shape of the grid.  Edge points are defined to be for each dimension the scalar values of the
+corner points in that dimension combined with the iteration of all scalars from the other dimensions
+omitting their corner values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.moore_neighborhood">
+<tt class="descname">moore_neighborhood</tt><big>(</big><em>include_origin=False</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.moore_neighborhood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.moore_neighborhood" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a neighborhood of all adjacent points along
+coordinate axes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.neighbors">
+<tt class="descname">neighbors</tt><big>(</big><em>center</em>, <em>neighbors_id</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.neighbors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.neighbors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the list of neighbors with the given neighbors_id. By
+default, IDs 0 and 1 give the list consisting of all
+points at a distance of 0 and 1 from the center point,
+respectively. Uses neighbor_definition to determine what the
+neighbors are.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.set_default_neighbor_definitions">
+<tt class="descname">set_default_neighbor_definitions</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.set_default_neighbor_definitions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.set_default_neighbor_definitions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the default for neighbors[0] and neighbors[1].  Note that neighbors[1]
+does not include the center point.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.set_grid_variables">
+<tt class="descname">set_grid_variables</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.set_grid_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.set_grid_variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.set_interior">
+<tt class="descname">set_interior</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.set_interior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.set_interior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the number of interior points in each dimension</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.set_neighborhood">
+<tt class="descname">set_neighborhood</tt><big>(</big><em>neighborhood_id</em>, <em>coordinate_list</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.set_neighborhood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.set_neighborhood" title="Permalink to this definition">¶</a></dt>
+<dd><p>a grid can one or more notions of a neighborhood of a given grid point
+neighborhood_id is an integer identifier of the neighborhood
+coordinate_list is a list of tuples appropriate to the shape of the grid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_grid.StencilGrid.von_neuman_neighborhood">
+<tt class="descname">von_neuman_neighborhood</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_grid.html#StencilGrid.von_neuman_neighborhood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_grid.StencilGrid.von_neuman_neighborhood" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a neighborhood of all adjacent points along
+coordinate axes, suitable for the dimension of this instance</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="stencil-code-stencil-kernel-module">
+<h2>stencil_code.stencil_kernel module<a class="headerlink" href="#stencil-code-stencil-kernel-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-stencil_code.stencil_model">
+<span id="stencil-code-stencil-model-module"></span><h2>stencil_code.stencil_model module<a class="headerlink" href="#module-stencil_code.stencil_model" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="stencil_code.stencil_model.GridElement">
+<em class="property">class </em><tt class="descclassname">stencil_code.stencil_model.</tt><tt class="descname">GridElement</tt><big>(</big><em>grid_name=None</em>, <em>target=None</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_model.html#GridElement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.GridElement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#stencil_code.stencil_model.StencilModelNode" title="stencil_code.stencil_model.StencilModelNode"><tt class="xref py py-class docutils literal"><span class="pre">stencil_code.stencil_model.StencilModelNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="stencil_code.stencil_model.InteriorPointsLoop">
+<em class="property">class </em><tt class="descclassname">stencil_code.stencil_model.</tt><tt class="descname">InteriorPointsLoop</tt><big>(</big><em>target=None</em>, <em>body=None</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_model.html#InteriorPointsLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.InteriorPointsLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#stencil_code.stencil_model.StencilModelNode" title="stencil_code.stencil_model.StencilModelNode"><tt class="xref py py-class docutils literal"><span class="pre">stencil_code.stencil_model.StencilModelNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="stencil_code.stencil_model.MathFunction">
+<em class="property">class </em><tt class="descclassname">stencil_code.stencil_model.</tt><tt class="descname">MathFunction</tt><big>(</big><em>func=None</em>, <em>args=None</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_model.html#MathFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.MathFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#stencil_code.stencil_model.StencilModelNode" title="stencil_code.stencil_model.StencilModelNode"><tt class="xref py py-class docutils literal"><span class="pre">stencil_code.stencil_model.StencilModelNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="stencil_code.stencil_model.NeighborPointsLoop">
+<em class="property">class </em><tt class="descclassname">stencil_code.stencil_model.</tt><tt class="descname">NeighborPointsLoop</tt><big>(</big><em>neighbor_id=None</em>, <em>grid_name=None</em>, <em>neighbor_target=None</em>, <em>body=None</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_model.html#NeighborPointsLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.NeighborPointsLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#stencil_code.stencil_model.StencilModelNode" title="stencil_code.stencil_model.StencilModelNode"><tt class="xref py py-class docutils literal"><span class="pre">stencil_code.stencil_model.StencilModelNode</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="stencil_code.stencil_model.StencilModelDotGen">
+<em class="property">class </em><tt class="descclassname">stencil_code.stencil_model.</tt><tt class="descname">StencilModelDotGen</tt><a class="reference internal" href="_modules/stencil_code/stencil_model.html#StencilModelDotGen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.StencilModelDotGen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ctree.dotgen.DotGenVisitor</span></tt></p>
+<dl class="method">
+<dt id="stencil_code.stencil_model.StencilModelDotGen.label_GridElement">
+<tt class="descname">label_GridElement</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_model.html#StencilModelDotGen.label_GridElement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.StencilModelDotGen.label_GridElement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_model.StencilModelDotGen.label_InteriorPointsLoop">
+<tt class="descname">label_InteriorPointsLoop</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_model.html#StencilModelDotGen.label_InteriorPointsLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.StencilModelDotGen.label_InteriorPointsLoop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_model.StencilModelDotGen.label_MathFunction">
+<tt class="descname">label_MathFunction</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_model.html#StencilModelDotGen.label_MathFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.StencilModelDotGen.label_MathFunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_model.StencilModelDotGen.label_NeighborPointsLoop">
+<tt class="descname">label_NeighborPointsLoop</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_model.html#StencilModelDotGen.label_NeighborPointsLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.StencilModelDotGen.label_NeighborPointsLoop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="stencil_code.stencil_model.StencilModelNode">
+<em class="property">class </em><tt class="descclassname">stencil_code.stencil_model.</tt><tt class="descname">StencilModelNode</tt><a class="reference internal" href="_modules/stencil_code/stencil_model.html#StencilModelNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_model.StencilModelNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">_ast.AST</span></tt></p>
+</dd></dl>
+
+</div>
+<div class="section" id="stencil-code-stencil-optimizer-module">
+<h2>stencil_code.stencil_optimizer module<a class="headerlink" href="#stencil-code-stencil-optimizer-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-stencil_code.stencil_python_frontend">
+<span id="stencil-code-stencil-python-frontend-module"></span><h2>stencil_code.stencil_python_frontend module<a class="headerlink" href="#module-stencil_code.stencil_python_frontend" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="stencil_code.stencil_python_frontend.PythonToStencilModel">
+<em class="property">class </em><tt class="descclassname">stencil_code.stencil_python_frontend.</tt><tt class="descname">PythonToStencilModel</tt><a class="reference internal" href="_modules/stencil_code/stencil_python_frontend.html#PythonToStencilModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_python_frontend.PythonToStencilModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">ctree.transformations.PyBasicConversions</span></tt></p>
+<dl class="method">
+<dt id="stencil_code.stencil_python_frontend.PythonToStencilModel.visit_Call">
+<tt class="descname">visit_Call</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_python_frontend.html#PythonToStencilModel.visit_Call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_python_frontend.PythonToStencilModel.visit_Call" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_python_frontend.PythonToStencilModel.visit_For">
+<tt class="descname">visit_For</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_python_frontend.html#PythonToStencilModel.visit_For"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_python_frontend.PythonToStencilModel.visit_For" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_python_frontend.PythonToStencilModel.visit_FunctionDef">
+<tt class="descname">visit_FunctionDef</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_python_frontend.html#PythonToStencilModel.visit_FunctionDef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_python_frontend.PythonToStencilModel.visit_FunctionDef" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="stencil_code.stencil_python_frontend.PythonToStencilModel.visit_Subscript">
+<tt class="descname">visit_Subscript</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/stencil_code/stencil_python_frontend.html#PythonToStencilModel.visit_Subscript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#stencil_code.stencil_python_frontend.PythonToStencilModel.visit_Subscript" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-stencil_code">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-stencil_code" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">stencil_code package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-stencil_code.stencil_grid">stencil_code.stencil_grid module</a></li>
+<li><a class="reference internal" href="#stencil-code-stencil-kernel-module">stencil_code.stencil_kernel module</a></li>
+<li><a class="reference internal" href="#module-stencil_code.stencil_model">stencil_code.stencil_model module</a></li>
+<li><a class="reference internal" href="#stencil-code-stencil-optimizer-module">stencil_code.stencil_optimizer module</a></li>
+<li><a class="reference internal" href="#module-stencil_code.stencil_python_frontend">stencil_code.stencil_python_frontend module</a></li>
+<li><a class="reference internal" href="#module-stencil_code">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/stencil_code.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">stencil_code 0.1a1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Leonard Truong.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

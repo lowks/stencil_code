@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>stencil_code.stencil_model &mdash; stencil_code 0.1a1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="stencil_code 0.1a1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">stencil_code 0.1a1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for stencil_code.stencil_model</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">from</span> <span class="nn">ctree.dotgen</span> <span class="kn">import</span> <span class="n">DotGenVisitor</span>
+
+
+<div class="viewcode-block" id="StencilModelNode"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.StencilModelNode">[docs]</a><span class="k">class</span> <span class="nc">StencilModelNode</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">AST</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_to_dot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c"># pragma: no cover</span>
+        <span class="k">return</span> <span class="n">StencilModelDotGen</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="InteriorPointsLoop"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.InteriorPointsLoop">[docs]</a><span class="k">class</span> <span class="nc">InteriorPointsLoop</span><span class="p">(</span><span class="n">StencilModelNode</span><span class="p">):</span>
+    <span class="n">_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;target&#39;</span><span class="p">,</span> <span class="s">&#39;body&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">body</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">InteriorPointsLoop</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="NeighborPointsLoop"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.NeighborPointsLoop">[docs]</a><span class="k">class</span> <span class="nc">NeighborPointsLoop</span><span class="p">(</span><span class="n">StencilModelNode</span><span class="p">):</span>
+    <span class="n">_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;neighbor_id&#39;</span><span class="p">,</span> <span class="s">&#39;grid_name&#39;</span><span class="p">,</span>
+               <span class="s">&#39;neighbor_target&#39;</span><span class="p">,</span> <span class="s">&#39;body&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighbor_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">grid_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">neighbor_target</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_id</span> <span class="o">=</span> <span class="n">neighbor_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span> <span class="o">=</span> <span class="n">grid_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_target</span> <span class="o">=</span> <span class="n">neighbor_target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">body</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NeighborPointsLoop</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="MathFunction"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.MathFunction">[docs]</a><span class="k">class</span> <span class="nc">MathFunction</span><span class="p">(</span><span class="n">StencilModelNode</span><span class="p">):</span>
+    <span class="n">_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;func&#39;</span><span class="p">,</span> <span class="s">&#39;args&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MathFunction</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="GridElement"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.GridElement">[docs]</a><span class="k">class</span> <span class="nc">GridElement</span><span class="p">(</span><span class="n">StencilModelNode</span><span class="p">):</span>
+    <span class="n">_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;grid_name&#39;</span><span class="p">,</span> <span class="s">&#39;target&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span> <span class="o">=</span> <span class="n">grid_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">StencilModelNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="StencilModelDotGen"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.StencilModelDotGen">[docs]</a><span class="k">class</span> <span class="nc">StencilModelDotGen</span><span class="p">(</span><span class="n">DotGenVisitor</span><span class="p">):</span>  <span class="c"># pragma: no cover</span>
+<div class="viewcode-block" id="StencilModelDotGen.label_InteriorPointsLoop"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.StencilModelDotGen.label_InteriorPointsLoop">[docs]</a>    <span class="k">def</span> <span class="nf">label_InteriorPointsLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">r&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="s">&quot;InteriorPointsLoop&quot;</span>
+</div>
+<div class="viewcode-block" id="StencilModelDotGen.label_NeighborPointsLoop"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.StencilModelDotGen.label_NeighborPointsLoop">[docs]</a>    <span class="k">def</span> <span class="nf">label_NeighborPointsLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">r&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="s">&quot;NeighborPointsLoop&quot;</span>
+</div>
+<div class="viewcode-block" id="StencilModelDotGen.label_MathFunction"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.StencilModelDotGen.label_MathFunction">[docs]</a>    <span class="k">def</span> <span class="nf">label_MathFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">r&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="s">&quot;MathFunction&quot;</span>
+</div>
+<div class="viewcode-block" id="StencilModelDotGen.label_GridElement"><a class="viewcode-back" href="../../stencil_code.html#stencil_code.stencil_model.StencilModelDotGen.label_GridElement">[docs]</a>    <span class="k">def</span> <span class="nf">label_GridElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">r&quot;</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="s">&quot;GridElement&quot;</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">stencil_code 0.1a1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Leonard Truong.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
